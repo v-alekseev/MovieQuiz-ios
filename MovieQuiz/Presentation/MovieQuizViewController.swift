@@ -1,9 +1,46 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController {
+    
+  
+    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        /*
+        Тут имеет смысл наполнить наше view данными.
+        */
+     
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+      /*
+      Тут имеет смысл дополнительно настроить наши изображения, например,
+      задать цвет фона для экрана.
+      */
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        /*
+        Тут имеет смысл оповестить систему аналитики о том, что экран показался.
+        */
+      }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+      super.viewWillDisappear(animated)
+      /*
+      Тут имеет смысл остановить все процессы, которые происходили на этом экране.
+      */
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+      super.viewDidDisappear(animated)
+      /*
+      Тут имеет смысл оповестить систему аналитики, что экран перестал показываться
+      и привести его в изначальное состояние.
+      */
     }
 }
 
