@@ -103,6 +103,7 @@ final class MovieQuizViewController: UIViewController {
         counterLabel.text = step.questionNumber
         imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.borderColor = UIColor.ypBlack.cgColor
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
     }
 
     private func show(quiz result: QuizResultsViewModel) {
