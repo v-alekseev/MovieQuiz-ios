@@ -65,18 +65,33 @@ final class MovieQuizViewController: UIViewController {
 
 
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
+    
+        let givenAnsver = true
         
-
-        // todo проверить выход за пределы массива
-        // проверяем что данный ответ(true) совпадает с правильнымч correctAnswer
-        showAnswerResult(isCorrect: questions[currentQuestionIndex].correctAnswer  == true)
+        // // проверяем что индекс не выходит за пределы массива
+        if (questions.indices.contains(currentQuestionIndex) == false) {
+            printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
+            return
+        }
+        
+        // определяем правильный или нет ответ и показываем его
+        showAnswerResult(isCorrect: questions[currentQuestionIndex].correctAnswer  == givenAnsver)
         
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         
-        // todo проверить выход за пределы массива
-        showAnswerResult(isCorrect: questions[currentQuestionIndex].correctAnswer  == false)
+        let givenAnsver = false
+        
+        // проверяем что данный ответ совпадает с правильным correctAnswer
+        if (questions.indices.contains(currentQuestionIndex) == false) {
+            printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
+            return
+        }
+        
+        // определяем правильный или нет ответ и показываем его
+        showAnswerResult(isCorrect: questions[currentQuestionIndex].correctAnswer  == givenAnsver)
+
     }
     
     
@@ -102,6 +117,7 @@ final class MovieQuizViewController: UIViewController {
         let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
             self.currentQuestionIndex = 0  // сразу вернем индекс в начало
             self.correctAnswers = 0 // обнулим количество правильных ответов
+            // тут не проверяем выход за пределы массива т.к. только что поставили его в 0.
             let currentQuestion = self.questions[self.currentQuestionIndex]
             // покажем первый вопрос
             self.show(quiz: self.convert(model: currentQuestion))
@@ -153,23 +169,36 @@ final class MovieQuizViewController: UIViewController {
           
             
         } else {
-          currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
-          // показать следующий вопрос
+            currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
+            // проверяем что индекс не выходит за пределы массива
+            if (questions.indices.contains(currentQuestionIndex) == false) {
+                printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
+                return
+            }
+            // показать следующий вопрос
             let currentQuestion = questions[currentQuestionIndex]
 
             show(quiz: self.convert(model: currentQuestion))
         }
     }
     
+    private func printError(_ log: String){
+        print(log + " File: \(#file) function: \(#function), line: \(#line)")
+    }
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // To Do. Тут надо бы проверить есть у нас currentQuestion или нет. А то падение
+        // проверяем что индекс не выходит за пределы массива
+        if (questions.indices.contains(currentQuestionIndex) == false) {
+            // ой. все плохо. Наверно надо на экране показать что-то осмысленное, но сейчас просто не дадим упасть приложению и запишем консоль тект
+            printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
+            return
+        }
         
-        //currentQuestionIndex=0
         let currentQuestion = questions[currentQuestionIndex]
-
+        // отрисовываем экран
         show(quiz: self.convert(model: currentQuestion))
         
      
