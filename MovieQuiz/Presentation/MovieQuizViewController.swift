@@ -107,6 +107,7 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.borderColor = UIColor.ypBlack.cgColor
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
+        
     }
 
     private func show(quiz result: QuizResultsViewModel) {
@@ -146,6 +147,7 @@ final class MovieQuizViewController: UIViewController {
     
     private func showAnswerResult(isCorrect: Bool) {
         
+        // блокируем кнопки
         yesButton.isEnabled = false
         noButton.isEnabled = false
         
@@ -159,6 +161,7 @@ final class MovieQuizViewController: UIViewController {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // запускаем задачу через 1 секунду
             // код, который вы хотите вызвать через 1 секунду,
+            // включаем кноаки
             self.yesButton.isEnabled = true
             self.noButton.isEnabled = true
             self.showNextQuestionOrResults()
