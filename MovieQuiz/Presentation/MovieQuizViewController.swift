@@ -119,7 +119,8 @@ final class MovieQuizViewController: UIViewController {
                                       preferredStyle: .alert) // preferredStyle может быть .alert или .actionSheet
 
         // создаём для него кнопки с действиями( нажали "Сыграть ещё раз")
-        let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
+        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+            guard let self = self else {return}
             self.currentQuestionIndex = 0  // сразу вернем индекс в начало
             self.correctAnswers = 0 // обнулим количество правильных ответов
             // тут не проверяем выход за пределы массива т.к. только что поставили его в 0.
@@ -159,7 +160,8 @@ final class MovieQuizViewController: UIViewController {
         
         if isCorrect { correctAnswers += 1} // если ответ правильный, увеличим счетчик
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // запускаем задачу через 1 секунду
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {  [weak self] in // запускаем задачу через 1 секунду
+            guard let self = self else {return}
             // код, который вы хотите вызвать через 1 секунду,
             // включаем кноаки
             self.yesButton.isEnabled = true
