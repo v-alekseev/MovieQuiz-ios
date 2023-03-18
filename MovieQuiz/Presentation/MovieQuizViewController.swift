@@ -1,30 +1,11 @@
 import UIKit
 
-// для состояния Ответ дан
-struct QuizQuestion {
-    let image: String
-    let text: String
-    let rating: Double
-    let correctAnswer: Bool
-}
-
-// для состояния "Вопрос задан"
-struct QuizStepViewModel {
-  let image: UIImage
-  let question: String
-  let questionNumber: String
-}
-
-// для состояния "Результат квиза"
-struct QuizResultsViewModel {
-  let title: String
-  let text: String
-  let buttonText: String
-}
 
 final class MovieQuizViewController: UIViewController {
     // MARK: - Types
-
+    private let questionsAmount: Int = 10
+    private let questionFactory: QuestionFactoryProtocol = QuestionFactory()
+    private var currentQuestion: QuizQuestion?
     // MARK: - Constants
 
     // MARK: - Public Properties
@@ -41,23 +22,6 @@ final class MovieQuizViewController: UIViewController {
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
 
-  
-    private let questions: [QuizQuestion] = [
-        QuizQuestion(image: "The Godfather", text: "Рейтинг этого фильма больше чем 6?", rating: 9.2, correctAnswer: true),
-        QuizQuestion(image: "The Dark Knight", text: "Рейтинг этого фильма больше чем 6?", rating: 9, correctAnswer: true),
-        QuizQuestion(image: "Kill Bill", text: "Рейтинг этого фильма больше чем 6?", rating: 8.1, correctAnswer: true),
-        QuizQuestion(image: "The Avengers", text: "Рейтинг этого фильма больше чем 6?", rating: 8, correctAnswer: true),
-        QuizQuestion(image: "Deadpool", text: "Рейтинг этого фильма больше чем 6?", rating: 8, correctAnswer: true),
-        QuizQuestion(image: "The Green Knight", text: "Рейтинг этого фильма больше чем 6?", rating: 6.6, correctAnswer: true),
-        QuizQuestion(image: "Old", text: "Рейтинг этого фильма больше чем 6?", rating: 5.8, correctAnswer: false),
-        QuizQuestion(image: "The Ice Age Adventures of Buck Wild", text: "Рейтинг этого фильма больше чем 6?", rating: 4.3, correctAnswer: false),
-        QuizQuestion(image: "Tesla", text: "Рейтинг этого фильма больше чем 6?", rating: 5.1, correctAnswer: false),
-        QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", rating: 5.8, correctAnswer: false)
-    ]
-    
-
-
-
     // MARK: - Initializers
 
     // MARK: - UIViewController(*)
@@ -72,13 +36,12 @@ final class MovieQuizViewController: UIViewController {
         let givenAnsver = true
         
         // // проверяем что индекс не выходит за пределы массива
-        if (questions.indices.contains(currentQuestionIndex) == false) {
-            printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
+        guard let currentQuestion = currentQuestion else {
             return
         }
         
         // определяем правильный или нет ответ и показываем его
-        showAnswerResult(isCorrect: questions[currentQuestionIndex].correctAnswer  == givenAnsver)
+        showAnswerResult(isCorrect: currentQuestion.correctAnswer  == givenAnsver)
         
     }
     
@@ -87,13 +50,12 @@ final class MovieQuizViewController: UIViewController {
         let givenAnsver = false
         
         // проверяем что данный ответ совпадает с правильным correctAnswer
-        if (questions.indices.contains(currentQuestionIndex) == false) {
-            printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
+        // // проверяем что индекс не выходит за пределы массива
+        guard let currentQuestion = currentQuestion else {
             return
         }
-        
         // определяем правильный или нет ответ и показываем его
-        showAnswerResult(isCorrect: questions[currentQuestionIndex].correctAnswer  == givenAnsver)
+        showAnswerResult(isCorrect: currentQuestion.correctAnswer  == givenAnsver)
 
     }
     
@@ -123,10 +85,13 @@ final class MovieQuizViewController: UIViewController {
             guard let self = self else {return}
             self.currentQuestionIndex = 0  // сразу вернем индекс в начало
             self.correctAnswers = 0 // обнулим количество правильных ответов
-            // тут не проверяем выход за пределы массива т.к. только что поставили его в 0.
-            let currentQuestion = self.questions[self.currentQuestionIndex]
-            // покажем первый вопрос
-            self.show(quiz: self.convert(model: currentQuestion))
+            
+            if let firstQuestion = self.questionFactory.requestNextQuestion() {
+                self.currentQuestion = firstQuestion
+                let viewModel = self.convert(model: firstQuestion)
+                
+                self.show(quiz: viewModel)
+            }
         }
 
         // добавляем в алерт кнопки
@@ -141,7 +106,7 @@ final class MovieQuizViewController: UIViewController {
         return QuizStepViewModel(
                 image: UIImage(named: model.image) ?? UIImage(), // Загружаем картинку
                 question: model.text,  // тупо тект
-                questionNumber: "\(currentQuestionIndex + 1)/\(questions.count)") // высчитываем номер вопроса
+                questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)") // высчитываем номер вопроса
 
       }
 
@@ -173,26 +138,23 @@ final class MovieQuizViewController: UIViewController {
     
     private func showNextQuestionOrResults() {
         
-        if currentQuestionIndex == questions.count - 1 { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
+        if currentQuestionIndex == questionsAmount - 1 { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
             // показать результат квиза
             let result = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
-                text: "Ваш результат: \(correctAnswers)/\(questions.count)",
+                text: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
                 buttonText: "Сыграть ещё раз")
             show(quiz: result)
           
             
         } else {
             currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
-            // проверяем что индекс не выходит за пределы массива
-            if (questions.indices.contains(currentQuestionIndex) == false) {
-                printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
-                return
+            if let nextQuestion = self.questionFactory.requestNextQuestion() {
+                self.currentQuestion = nextQuestion
+                let viewModel = self.convert(model: nextQuestion)
+                
+                self.show(quiz: viewModel)
             }
-            // показать следующий вопрос
-            let currentQuestion = questions[currentQuestionIndex]
-
-            show(quiz: self.convert(model: currentQuestion))
         }
     }
     
@@ -204,17 +166,11 @@ final class MovieQuizViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // проверяем что индекс не выходит за пределы массива
-        if (questions.indices.contains(currentQuestionIndex) == false) {
-            // ой. все плохо. Наверно надо на экране показать что-то осмысленное, но сейчас просто не дадим упасть приложению и запишем консоль тект
-            printError("currentQuestionIndex = \(currentQuestionIndex) is out of range.")
-            return
+        if let firstQuestion = questionFactory.requestNextQuestion() {
+            currentQuestion = firstQuestion
+            let viewModel = convert(model: firstQuestion)
+            show(quiz: viewModel)
         }
-        
-        let currentQuestion = questions[currentQuestionIndex]
-        // отрисовываем экран
-        show(quiz: self.convert(model: currentQuestion))
-        
      
     }
     
