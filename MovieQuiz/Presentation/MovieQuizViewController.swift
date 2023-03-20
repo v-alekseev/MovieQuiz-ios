@@ -74,31 +74,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
     }
 
-    private func show(quiz result: QuizResultsViewModel) {
-      // здесь мы показываем результат прохождения квиза
-        
-        // создаём объекты всплывающего окна
-        
-
-        let alert = UIAlertController(title:  result.title, // заголовок всплывающего окна
-                                      message: result.text, // текст во всплывающем окне
-                                      preferredStyle: .alert) // preferredStyle может быть .alert или .actionSheet
-
-        // создаём для него кнопки с действиями( нажали "Сыграть ещё раз")
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
-            guard let self = self else {return}
-            self.currentQuestionIndex = 0  // сразу вернем индекс в начало
-            self.correctAnswers = 0 // обнулим количество правильных ответов
-
-            self.questionFactory?.requestNextQuestion()
-        }
-
-        // добавляем в алерт кнопки
-        alert.addAction(action)
-
-        // показываем всплывающее окно
-        self.present(alert, animated: true, completion: nil)
-    }
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
       // Попробуйте написать код конвертации сами
