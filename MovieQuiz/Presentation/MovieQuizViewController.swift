@@ -6,6 +6,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    
+
     // MARK: - Constants
 
     // MARK: - Public Properties
@@ -76,6 +78,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
       // здесь мы показываем результат прохождения квиза
         
         // создаём объекты всплывающего окна
+        
+
         let alert = UIAlertController(title:  result.title, // заголовок всплывающего окна
                                       message: result.text, // текст во всплывающем окне
                                       preferredStyle: .alert) // preferredStyle может быть .alert или .actionSheet
@@ -85,7 +89,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             guard let self = self else {return}
             self.currentQuestionIndex = 0  // сразу вернем индекс в начало
             self.correctAnswers = 0 // обнулим количество правильных ответов
-            
+
             self.questionFactory?.requestNextQuestion()
         }
 
@@ -135,11 +139,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         if currentQuestionIndex == questionsAmount - 1 { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
             // показать результат квиза
-            let result = QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
-                buttonText: "Сыграть ещё раз")
-            show(quiz: result)
+
+            /// todo Вопрос- создавать тут или как свойство класса?
+            let alertViewController = AlertPresenter(parentViewController: self)
+            
+            let alertModel = AlertModel(title: "Этот раунд окончен!",
+                                   message: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
+                                   buttonText: "Сыграть ещё раз") { [weak self] in
+                guard let self = self else {return}
+                self.currentQuestionIndex = 0  // сразу вернем индекс в начало
+                self.correctAnswers = 0 // обнулим количество правильных ответов
+
+                self.questionFactory?.requestNextQuestion()
+            }
+            
+            
+            alertViewController.alert(model: alertModel)
           
             
         } else {
@@ -206,69 +221,3 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 }
 
-
-
-
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- */
