@@ -1,10 +1,10 @@
 import UIKit
 
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Types
     private let questionsAmount: Int = 10
-    private let questionFactory: QuestionFactoryProtocol = QuestionFactory()
+    private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     // MARK: - Constants
 
@@ -86,12 +86,7 @@ final class MovieQuizViewController: UIViewController {
             self.currentQuestionIndex = 0  // сразу вернем индекс в начало
             self.correctAnswers = 0 // обнулим количество правильных ответов
             
-            if let firstQuestion = self.questionFactory.requestNextQuestion() {
-                self.currentQuestion = firstQuestion
-                let viewModel = self.convert(model: firstQuestion)
-                
-                self.show(quiz: viewModel)
-            }
+            self.questionFactory?.requestNextQuestion()
         }
 
         // добавляем в алерт кнопки
@@ -149,12 +144,7 @@ final class MovieQuizViewController: UIViewController {
             
         } else {
             currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
-            if let nextQuestion = self.questionFactory.requestNextQuestion() {
-                self.currentQuestion = nextQuestion
-                let viewModel = self.convert(model: nextQuestion)
-                
-                self.show(quiz: viewModel)
-            }
+            questionFactory?.requestNextQuestion()
         }
     }
     
@@ -162,16 +152,28 @@ final class MovieQuizViewController: UIViewController {
         print(log + " File: \(#file) function: \(#function), line: \(#line)")
     }
     
+    // MARK: - QuestionFactoryDelegate
+
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
+        }
+    }
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let firstQuestion = questionFactory.requestNextQuestion() {
-            currentQuestion = firstQuestion
-            let viewModel = convert(model: firstQuestion)
-            show(quiz: viewModel)
-        }
-     
+        questionFactory = QuestionFactory(delegate: self)
+        
+        questionFactory?.requestNextQuestion()
+    
     }
     
     override func viewWillAppear(_ animated: Bool) {
