@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 class AlertPresenter {
-    let parentViewController: UIViewController
+    var parentViewController: UIViewController
     
     init(parentViewController :UIViewController){
         self.parentViewController = parentViewController
@@ -33,4 +33,8 @@ class AlertPresenter {
         // показываем всплывающее окно
         self.parentViewController.present(alert, animated: true, completion: nil)
     }
+    
+    deinit {
+            print(#function)
+        }
 }

@@ -7,6 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
+   
 
     // MARK: - Constants
 
@@ -116,7 +117,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             // показать результат квиза
 
             /// todo Вопрос- создавать тут или как свойство класса?
+           // let alertViewController = AlertPresenter(parentViewController: self)
             let alertViewController = AlertPresenter(parentViewController: self)
+
             
             let alertModel = AlertModel(title: "Этот раунд окончен!",
                                    message: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
