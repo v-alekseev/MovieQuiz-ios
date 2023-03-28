@@ -9,9 +9,10 @@ import Foundation
 import UIKit
 
 class AlertPresenter {
-    var parentViewController: UIViewController
+    // Зачем? AlertPresenter и так умипает сразу и счетчик уменьшается
+    weak var parentViewController: UIViewController?
     
-    init(parentViewController :UIViewController){
+    init(parentViewController: UIViewController){
         self.parentViewController = parentViewController
     }
     
@@ -31,7 +32,7 @@ class AlertPresenter {
         alert.addAction(action)
 
         // показываем всплывающее окно
-        self.parentViewController.present(alert, animated: true, completion: nil)
+        self.parentViewController?.present(alert, animated: true, completion: nil)
     }
     
     deinit {

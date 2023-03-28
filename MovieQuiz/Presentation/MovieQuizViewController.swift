@@ -6,6 +6,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var staticService = StatisticServiceImplementation()
     
    
 
@@ -32,8 +33,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Public methods
 
     // MARK: - IBAction
-
-
+    
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
     
         let givenAnsver = true
@@ -114,15 +114,31 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showNextQuestionOrResults() {
         
         if currentQuestionIndex == questionsAmount - 1 { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
-            // показать результат квиза
-
-            /// todo Вопрос- создавать тут или как свойство класса?
-           // let alertViewController = AlertPresenter(parentViewController: self)
-            let alertViewController = AlertPresenter(parentViewController: self)
+            // Достигли последнего вопроса. показать результат квиза
+            
+            // сохраняем результат в  UserData
+            staticService.store(correct: correctAnswers, total: questionsAmount)
+            
+            
+            //В первой строке выводится результат текущей игры.
+            //Во второй строчке выводится количество завершённых игр.
+            //Третья строчка показывает информацию о лучшей попытке.
+            //Четвёртая строка отображает среднюю точность правильных ответов за все игры в процентах.
 
             
+            // !!! в dateTimeString была ошибка формата. Надо HH, а не hh !!!
+            
+            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\n" +
+            "Количество сыграных квизов: \(staticService.gamesCount)\n" +
+            "Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))\n" +
+            "Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%"
+
+    
+            let alertViewController = AlertPresenter(parentViewController: self)
+
+
             let alertModel = AlertModel(title: "Этот раунд окончен!",
-                                   message: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
+                                   message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in
                 guard let self = self else {return}
                 self.currentQuestionIndex = 0  // сразу вернем индекс в начало
@@ -164,7 +180,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         super.viewDidLoad()
 
         questionFactory = QuestionFactory(delegate: self)
-        
         questionFactory?.requestNextQuestion()
     
     }
