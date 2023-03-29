@@ -6,7 +6,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-    private var staticService = StatisticServiceImplementation()
+    private var staticService: StatisticService = StatisticServiceImplementation()
+
     
    
 
@@ -128,15 +129,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             
             // !!! в dateTimeString была ошибка формата. Надо HH, а не hh !!!
             
-            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\n" +
-            "Количество сыграных квизов: \(staticService.gamesCount)\n" +
-            "Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))\n" +
-            "Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%"
-
+//            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\n" +
+//            "Количество сыграных квизов: \(staticService.gamesCount)\n" +
+//            "Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))\n" +
+//            "Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%"
+//
+            let message = """
+Ваш результат: \(correctAnswers)/\(questionsAmount)
+Количество сыграных квизов: \(staticService.gamesCount)
+Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))
+Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%
+"""
+    
     
             let alertViewController = AlertPresenter(parentViewController: self)
-
-
             let alertModel = AlertModel(title: "Этот раунд окончен!",
                                    message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in

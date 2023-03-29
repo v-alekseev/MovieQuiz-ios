@@ -7,7 +7,7 @@
 
 import Foundation
 
-class AlertModel {
+final class AlertModel {
     var title: String
     var message: String
     var buttonText: String

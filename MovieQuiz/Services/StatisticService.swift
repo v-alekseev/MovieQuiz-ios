@@ -89,7 +89,6 @@ final class StatisticServiceImplementation: StatisticService {
     }
     
 
-    
     func store(correct count: Int, total amount: Int) {
         let currentGameResult = GameRecord(correct: count, total: amount, date: Date.init())
         
@@ -105,15 +104,11 @@ final class StatisticServiceImplementation: StatisticService {
     
     // служебная функция для теста. Оставим пока тут
     func clear() {
-        
         self.totalAccuracy = 0
         self.gamesCount = 0
         self.bestGame = GameRecord(correct: 0, total: 0, date: Date())
         self.totalCorrectAnswer = 0
-
-        
     }
 
-    
 }
-//Comparable
+

@@ -7,9 +7,9 @@
 
 import Foundation
 
-class QuestionFactory: QuestionFactoryProtocol {
-    var currentIndex = 0
-    var previosIndex = 0
+final class QuestionFactory: QuestionFactoryProtocol {
+    private var currentIndex = 0
+    private var previosIndex = 0
     
     weak var delegate: QuestionFactoryDelegate?
 

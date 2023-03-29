@@ -5,7 +5,6 @@
 //  Created by Vitaly Alekseev on 21.03.2023.
 //
 
-import Foundation
 import UIKit
 
 class AlertPresenter {
@@ -37,5 +36,6 @@ class AlertPresenter {
     
     deinit {
             print(#function)
+            //assertionFailure(#function)
         }
 }
