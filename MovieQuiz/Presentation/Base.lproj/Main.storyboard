@@ -117,16 +117,22 @@
                                     </stackView>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="lQM-IX-hIi">
+                                <rect key="frame" x="197" y="443" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
                             <constraint firstItem="OvX-of-gbd" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="7B0-FF-uWt"/>
+                            <constraint firstItem="lQM-IX-hIi" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Fcx-L0-Viz"/>
+                            <constraint firstItem="lQM-IX-hIi" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="d4R-Fn-GTz"/>
                             <constraint firstItem="OvX-of-gbd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="e8N-Ae-WOc"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="OvX-of-gbd" secondAttribute="trailing" constant="20" id="yVf-K8-xcX"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityIndicator" destination="lQM-IX-hIi" id="4vt-U9-WgN"/>
                         <outlet property="counterLabel" destination="R9s-83-dv2" id="Sv5-fm-sK7"/>
                         <outlet property="imageView" destination="soW-x3-1Gh" id="6yn-bf-tgZ"/>
                         <outlet property="noButton" destination="F64-LM-fR3" id="rpk-yB-GG0"/>

@@ -8,7 +8,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var currentQuestion: QuizQuestion?
     private var staticService: StatisticService = StatisticServiceImplementation()
 
-    
+    let alertViewController = AlertPresenter()
    
 
     // MARK: - Constants
@@ -20,6 +20,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
     
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
     
@@ -125,15 +126,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             //Во второй строчке выводится количество завершённых игр.
             //Третья строчка показывает информацию о лучшей попытке.
             //Четвёртая строка отображает среднюю точность правильных ответов за все игры в процентах.
-
-            
-            // !!! в dateTimeString была ошибка формата. Надо HH, а не hh !!!
-            
-//            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\n" +
-//            "Количество сыграных квизов: \(staticService.gamesCount)\n" +
-//            "Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))\n" +
-//            "Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%"
-//
             let message = """
 Ваш результат: \(correctAnswers)/\(questionsAmount)
 Количество сыграных квизов: \(staticService.gamesCount)
@@ -142,7 +134,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 """
     
     
-            let alertViewController = AlertPresenter(parentViewController: self)
+            //let alertViewController = AlertPresenter(parentViewController: self)
             let alertModel = AlertModel(title: "Этот раунд окончен!",
                                    message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in
@@ -167,6 +159,36 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         print(log + " File: \(#file) function: \(#function), line: \(#line)")
     }
     
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+    
+    private func showNetworkError(message: String) {
+        // hideLoadingIndicator() // скрываем индикатор загрузки
+        
+        //создаем и показываем алерт
+        //let message = "К сожалению, у меня не олучилось агрузить данные."
+       // let alertViewController = AlertPresenter(parentViewController: self)
+        let alertModel = AlertModel(title: "Ошибка!",
+                               message: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else {return}
+
+            // todo
+//            self.currentQuestionIndex = 0
+//            self.correctAnswers = 0
+//
+//            self.questionFactory?.requestNextQuestion()
+
+        }
+
+        
+        alertViewController.alert(model: alertModel)
+        
+
+    }
+    
     // MARK: - QuestionFactoryDelegate
 
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -184,6 +206,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        alertViewController.parentViewController  = self
 
         questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
