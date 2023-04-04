@@ -166,7 +166,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         print(log + " File: \(#file) function: \(#function), line: \(#line)")
     }
     
-    func showLoadingIndicator() {
+    private func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
     }

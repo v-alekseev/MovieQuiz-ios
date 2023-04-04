@@ -80,7 +80,6 @@ final class QuestionFactory: QuestionFactoryProtocol {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.delegate?.showLoadingIndicator()
                 switch result {
                 case .success(let mostPopularMovies):
                     self.movies = mostPopularMovies.items // сохраняем фильм в нашу новую переменную
