@@ -48,17 +48,21 @@ final class QuestionFactory: QuestionFactoryProtocol {
             
             var imageData = Data()
            
-           do {
+            // долгая загрузка
+            //self.delegate?.showLoadingIndicator()
+            do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
                 print("Failed to load image")
             }
-            
+            //self.delegate?.hideLoadingIndicator()
+
+
             let rating = Double(movie.rating) ?? 0
             
             let text = "Рейтинг этого фильма больше чем \(self.ratingLevel)?"
             let correctAnswer = rating > self.ratingLevel
-            
+
             let question = QuizQuestion(image: imageData,
                                          text: text,
                                          rating: rating,
@@ -76,6 +80,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                self.delegate?.showLoadingIndicator()
                 switch result {
                 case .success(let mostPopularMovies):
                     self.movies = mostPopularMovies.items // сохраняем фильм в нашу новую переменную

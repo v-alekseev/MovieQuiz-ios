@@ -34,8 +34,7 @@ struct MoviesLoader: MoviesLoading {
                     do {
                         // преобразуем полученный json из API к типу MostPopularMovies
                         let movies = try JSONDecoder().decode(MostPopularMovies.self, from: data)
-                        print(movies.items.count)
-                        
+
                         handler(Result.success(movies))
                         
                     } catch {

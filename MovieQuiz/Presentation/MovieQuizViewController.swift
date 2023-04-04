@@ -166,7 +166,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         print(log + " File: \(#file) function: \(#function), line: \(#line)")
     }
     
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
     }
@@ -183,13 +183,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else {return}
 
-            // todo проверить как это работает
+            // проверить как это работает
+            // показываем индикатор загрузки
+            self.showLoadingIndicator()
             self.questionFactory?.loadData()
-            
-//            self.currentQuestionIndex = 0
-//            self.correctAnswers = 0
-//
-//            self.questionFactory?.requestNextQuestion()
 
         }
         
@@ -203,6 +200,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             return
         }
         
+        //скрываем индикатор загрузки
+        hideLoadingIndicator()
+        
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
@@ -211,14 +211,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     func didLoadDataFromServer() {
-        //скрываем индикатор загрузки
-        hideLoadingIndicator()
-        
+        //скрываем индикатор загрузки в didReceiveNextQuestion т/к/ последует долгая загрузка картинок.
         questionFactory?.requestNextQuestion()
     }
 
     func didFailToLoadData(with error: Error) {
-        //скрываем индикатор загрузки
+        //скрываем индикатор загрузки т.к. дальше только показ ошибки
         hideLoadingIndicator()
 
         showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
@@ -239,11 +237,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         // загружаем данные
         questionFactory?.loadData()
-        // берем  следующий запрос
-        //questionFactory?.requestNextQuestion() - didLoadDataFromServer  тут вызываем следующий вопрос
-        
+
     }
     
+    // это нужно для белого шрифта в статус бар
     override var preferredStatusBarStyle: UIStatusBarStyle {
             return .lightContent
         }
