@@ -9,7 +9,8 @@ import Foundation
 
 // для состояния Ответ дан
 struct QuizQuestion {
-    let image: String
+    //let image: String
+    let image: Data
     let text: String
     let rating: Double
     let correctAnswer: Bool

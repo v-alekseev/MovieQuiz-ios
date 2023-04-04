@@ -7,6 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var staticService: StatisticService = StatisticServiceImplementation()
+    private let moviesLoader: MoviesLoading  = MoviesLoader()
 
     let alertViewController = AlertPresenter()
    
@@ -80,12 +81,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
       // Попробуйте написать код конвертации сами
+        
+       // let imageData = try Data(contentsOf: someImageURL) // try, потому что загрузка данных по URL может быть и не успешной
+       // let image = UIImage(data: imageData)
+        
         return QuizStepViewModel(
-                image: UIImage(named: model.image) ?? UIImage(), // Загружаем картинку
+                //image: UIImage(named: model.image) ?? UIImage(), // Загружаем картинку
+            image: UIImage(data: model.image) ?? UIImage(),
                 question: model.text,  // тупо тект
                 questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)") // высчитываем номер вопроса
 
       }
+    
 
     
     private func showAnswerResult(isCorrect: Bool) {
@@ -164,29 +171,29 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         activityIndicator.startAnimating() // включаем анимацию
     }
     
+    private func hideLoadingIndicator() {
+        activityIndicator.stopAnimating() // выключаем анимацию
+        activityIndicator.isHidden = true // говорим, что индикатор загрузки скрыт
+    }
+    
     private func showNetworkError(message: String) {
-        // hideLoadingIndicator() // скрываем индикатор загрузки
-        
         //создаем и показываем алерт
-        //let message = "К сожалению, у меня не олучилось агрузить данные."
-       // let alertViewController = AlertPresenter(parentViewController: self)
         let alertModel = AlertModel(title: "Ошибка!",
                                message: message,
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else {return}
 
-            // todo
+            // todo проверить как это работает
+            self.questionFactory?.loadData()
+            
 //            self.currentQuestionIndex = 0
 //            self.correctAnswers = 0
 //
 //            self.questionFactory?.requestNextQuestion()
 
         }
-
         
         alertViewController.alert(model: alertModel)
-        
-
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -203,13 +210,37 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
+    func didLoadDataFromServer() {
+        //скрываем индикатор загрузки
+        hideLoadingIndicator()
+        
+        questionFactory?.requestNextQuestion()
+    }
+
+    func didFailToLoadData(with error: Error) {
+        //скрываем индикатор загрузки
+        hideLoadingIndicator()
+
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+    }
+
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        // фактически инициализируем класс показа алерта
         alertViewController.parentViewController  = self
+        
+        // показываем индикатор загрузки
+        showLoadingIndicator()
+        
 
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
+        questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: self)
+        
+        // загружаем данные
+        questionFactory?.loadData()
+        // берем  следующий запрос
+        //questionFactory?.requestNextQuestion() - didLoadDataFromServer  тут вызываем следующий вопрос
         
     }
     
