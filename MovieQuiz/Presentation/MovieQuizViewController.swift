@@ -133,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 """
     
     
-            //let alertViewController = AlertPresenter(parentViewController: self)
+
             let alertModel = AlertModel(title: "Этот раунд окончен!",
                                    message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in
@@ -159,13 +159,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     private func showLoadingIndicator() {
-        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
         activityIndicator.startAnimating() // включаем анимацию
     }
     
     private func hideLoadingIndicator() {
         activityIndicator.stopAnimating() // выключаем анимацию
-        activityIndicator.isHidden = true // говорим, что индикатор загрузки скрыт
     }
     
     private func showNetworkError(message: String) {
@@ -186,6 +184,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // MARK: - QuestionFactoryDelegate
+    func didFailReceiveNextQuestion() {
+
+        let alertModel = AlertModel(title: "Ошибка загрузки вопроса!",
+                               message: "К сожалению, не получилось загрузить вопрос.",
+                               buttonText: "Загрузить следующий вопрос") { [weak self] in
+            guard let self = self else {return}
+            
+            self.questionFactory?.requestNextQuestion()
+        }
+        
+        alertViewController.alert(model: alertModel)
+    }
 
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -229,6 +239,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.backgroundColor = UIColor.ypWhite
         
         // показываем индикатор загрузки
+        activityIndicator.hidesWhenStopped = true
+
         showLoadingIndicator()
         
         questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: self)

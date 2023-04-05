@@ -11,10 +11,6 @@ class AlertPresenter {
     // Зачем? AlertPresenter и так умипает сразу и счетчик уменьшается
     weak var parentViewController: UIViewController? = nil
     
-//    init(parentViewController: UIViewController){
-//        self.parentViewController = parentViewController
-//    }
-    
     func alert(model: AlertModel){
         
         // создаём объекты всплывающего окна

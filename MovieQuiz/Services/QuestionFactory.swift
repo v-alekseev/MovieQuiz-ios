@@ -10,7 +10,7 @@ import Foundation
 final class QuestionFactory: QuestionFactoryProtocol {
     private var currentIndex = 0
     private var previosIndex = 0
-    private let ratingLevel: Double = 8.3
+    private var ratingLevel: Double = 8.3
     
     weak var delegate: QuestionFactoryDelegate?
     private let moviesLoader: MoviesLoading
@@ -48,17 +48,23 @@ final class QuestionFactory: QuestionFactoryProtocol {
             
             var imageData = Data()
            
-            // долгая загрузка
-            //self.delegate?.showLoadingIndicator()
+             // долгая загрузка
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
                 print("Failed to load image")
+                // Показываем алерт об ошибке и показывавам следеющий запрос/
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.delegate?.didFailReceiveNextQuestion()
+                }
+                return
             }
-            //self.delegate?.hideLoadingIndicator()
-
 
             let rating = Double(movie.rating) ?? 0
+            
+            let randomRading = (75...91).randomElement() ?? 0
+            self.ratingLevel = Double(randomRading)/10
             
             let text = "Рейтинг этого фильма больше чем \(self.ratingLevel)?"
             let correctAnswer = rating > self.ratingLevel
