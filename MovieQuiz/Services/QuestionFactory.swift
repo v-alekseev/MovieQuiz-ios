@@ -76,7 +76,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
     }
     
     func loadData() {
-        // todo   зачем тут DispatchQueue.main.async
+        // todo   зачем тут DispatchQueue.main.async  - сетевые запросы всегда работают в другом потоке, когда мы обрабатываем ответ от загрузчика фильмов в QuestionFactory, надо тоже перейти в главный поток (используем конструкцию DispatchQueue.main.async).
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }

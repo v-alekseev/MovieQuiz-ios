@@ -68,32 +68,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Methods
     private func show(quiz step: QuizStepViewModel) {
-      // здесь мы заполняем нашу картинку, текст и счётчик данными
+
+        imageView.backgroundColor = UIColor.ypBlack
+        
+        // меняем цвет рамки на черный, т/к/ новый вопрос
+        imageView.layer.borderColor = UIColor.ypBlack.cgColor
+        
+        // здесь мы заполняем нашу картинку, текст и счётчик данными
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderColor = UIColor.ypBlack.cgColor
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
-        
     }
 
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
       // Попробуйте написать код конвертации сами
         
-       // let imageData = try Data(contentsOf: someImageURL) // try, потому что загрузка данных по URL может быть и не успешной
-       // let image = UIImage(data: imageData)
-        
         return QuizStepViewModel(
-                //image: UIImage(named: model.image) ?? UIImage(), // Загружаем картинку
             image: UIImage(data: model.image) ?? UIImage(),
                 question: model.text,  // тупо тект
                 questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)") // высчитываем номер вопроса
-
       }
-    
-
     
     private func showAnswerResult(isCorrect: Bool) {
         
@@ -101,10 +96,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         yesButton.isEnabled = false
         noButton.isEnabled = false
         
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderWidth = 8 // толщина рамки
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
-        
+        // устанавливаем цвет рамки в зависимости от того, правильный или нет ответ
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor  // цвет рамки
         
         if isCorrect { correctAnswers += 1} // если ответ правильный, увеличим счетчик
@@ -226,13 +218,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // фактически инициализируем класс показа алерта
         alertViewController.parentViewController  = self
+        
+        // рисуем рамку вокруг картинки
+        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
+        imageView.layer.borderWidth = 8 // толщина рамки
+        imageView.layer.borderColor = UIColor.ypBlack.cgColor
+        
+        imageView.backgroundColor = UIColor.ypWhite
         
         // показываем индикатор загрузки
         showLoadingIndicator()
         
-
         questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: self)
         
         // загружаем данные
