@@ -7,8 +7,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var staticService: StatisticService = StatisticServiceImplementation()
+    private let moviesLoader: MoviesLoading  = MoviesLoader()
 
-    
+    let alertViewController = AlertPresenter()
    
 
     // MARK: - Constants
@@ -20,6 +21,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
     
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var noButton: UIButton!
     
@@ -66,26 +68,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Methods
     private func show(quiz step: QuizStepViewModel) {
-      // здесь мы заполняем нашу картинку, текст и счётчик данными
+
+        imageView.backgroundColor = UIColor.ypBlack
+        
+        // меняем цвет рамки на черный, т/к/ новый вопрос
+        imageView.layer.borderColor = UIColor.ypBlack.cgColor
+        
+        // здесь мы заполняем нашу картинку, текст и счётчик данными
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderColor = UIColor.ypBlack.cgColor
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
-        
     }
 
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
       // Попробуйте написать код конвертации сами
+        
         return QuizStepViewModel(
-                image: UIImage(named: model.image) ?? UIImage(), // Загружаем картинку
+            image: UIImage(data: model.image) ?? UIImage(),
                 question: model.text,  // тупо тект
                 questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)") // высчитываем номер вопроса
-
       }
-
     
     private func showAnswerResult(isCorrect: Bool) {
         
@@ -93,10 +96,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         yesButton.isEnabled = false
         noButton.isEnabled = false
         
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderWidth = 8 // толщина рамки
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
-        
+        // устанавливаем цвет рамки в зависимости от того, правильный или нет ответ
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor  // цвет рамки
         
         if isCorrect { correctAnswers += 1} // если ответ правильный, увеличим счетчик
@@ -125,15 +125,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             //Во второй строчке выводится количество завершённых игр.
             //Третья строчка показывает информацию о лучшей попытке.
             //Четвёртая строка отображает среднюю точность правильных ответов за все игры в процентах.
-
-            
-            // !!! в dateTimeString была ошибка формата. Надо HH, а не hh !!!
-            
-//            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount)\n" +
-//            "Количество сыграных квизов: \(staticService.gamesCount)\n" +
-//            "Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))\n" +
-//            "Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%"
-//
             let message = """
 Ваш результат: \(correctAnswers)/\(questionsAmount)
 Количество сыграных квизов: \(staticService.gamesCount)
@@ -142,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 """
     
     
-            let alertViewController = AlertPresenter(parentViewController: self)
+
             let alertModel = AlertModel(title: "Этот раунд окончен!",
                                    message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in
@@ -167,12 +158,52 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         print(log + " File: \(#file) function: \(#function), line: \(#line)")
     }
     
+    private func showLoadingIndicator() {
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.stopAnimating() // выключаем анимацию
+    }
+    
+    private func showNetworkError(message: String) {
+        //создаем и показываем алерт
+        let alertModel = AlertModel(title: "Ошибка!",
+                               message: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else {return}
+
+            // проверить как это работает
+            // показываем индикатор загрузки
+            self.showLoadingIndicator()
+            self.questionFactory?.loadData()
+
+        }
+        
+        alertViewController.alert(model: alertModel)
+    }
+    
     // MARK: - QuestionFactoryDelegate
+    func didFailReceiveNextQuestion() {
+
+        let alertModel = AlertModel(title: "Ошибка загрузки вопроса!",
+                               message: "К сожалению, не получилось загрузить вопрос.",
+                               buttonText: "Загрузить следующий вопрос") { [weak self] in
+            guard let self = self else {return}
+            
+            self.questionFactory?.requestNextQuestion()
+        }
+        
+        alertViewController.alert(model: alertModel)
+    }
 
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
             return
         }
+        
+        //скрываем индикатор загрузки
+        hideLoadingIndicator()
         
         currentQuestion = question
         let viewModel = convert(model: question)
@@ -181,14 +212,48 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
+    func didLoadDataFromServer() {
+        //скрываем индикатор загрузки в didReceiveNextQuestion т/к/ последует долгая загрузка картинок.
+        questionFactory?.requestNextQuestion()
+    }
+
+    func didFailToLoadData(with error: Error) {
+        //скрываем индикатор загрузки т.к. дальше только показ ошибки
+        hideLoadingIndicator()
+
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+    }
+
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        alertViewController.parentViewController  = self
+        
+        // рисуем рамку вокруг картинки
+        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
+        imageView.layer.borderWidth = 8 // толщина рамки
+        imageView.layer.borderColor = UIColor.ypBlack.cgColor
+        
+        imageView.backgroundColor = UIColor.ypWhite
+        
+        // показываем индикатор загрузки
+        activityIndicator.hidesWhenStopped = true
 
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
-    
+        showLoadingIndicator()
+        
+        questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: self)
+        
+        // загружаем данные
+        questionFactory?.loadData()
+
     }
+    
+    // это нужно для белого шрифта в статус бар
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+            return .lightContent
+        }
     
     override func viewWillAppear(_ animated: Bool) {
       super.viewWillAppear(animated)
