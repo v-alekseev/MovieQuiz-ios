@@ -6,7 +6,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     //private let questionsAmount: Int = 10
     private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
+    private var currentQuestion: QuizQuestion? // todo delete
     private var staticService: StatisticService = StatisticServiceImplementation()
     private let moviesLoader: MoviesLoading  = MoviesLoader()
 
@@ -35,56 +35,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - UIViewController(*)
 
     // MARK: - Public methods
-
-    // MARK: - IBAction
     
-    @IBAction private func yesButtonClicked(_ sender: UIButton) {
-    
-        let givenAnsver = true
-        
-        // // проверяем что индекс не выходит за пределы массива
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        
-        // определяем правильный или нет ответ и показываем его
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer  == givenAnsver)
-        
-    }
-    
-    @IBAction private func noButtonClicked(_ sender: UIButton) {
-        
-        let givenAnsver = false
-        
-        // проверяем что данный ответ совпадает с правильным correctAnswer
-        // // проверяем что индекс не выходит за пределы массива
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        // определяем правильный или нет ответ и показываем его
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer  == givenAnsver)
-
-    }
-    
-    
-    // MARK: - Private Methods
-    private func show(quiz step: QuizStepViewModel) {
-
-        imageView.backgroundColor = UIColor.ypBlack
-        
-        // меняем цвет рамки на черный, т/к/ новый вопрос
-        imageView.layer.borderColor = UIColor.ypBlack.cgColor
-        
-        // здесь мы заполняем нашу картинку, текст и счётчик данными
-        imageView.image = step.image
-        textLabel.text = step.question
-        counterLabel.text = step.questionNumber
-    }
-
-    
-
-    
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         
         // блокируем кнопки
         yesButton.isEnabled = false
@@ -104,6 +56,33 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self.showNextQuestionOrResults()
         }
 
+    }
+
+    // MARK: - IBAction
+    
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
+    }
+    
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
+    }
+    
+    
+    // MARK: - Private Methods
+    private func show(quiz step: QuizStepViewModel) {
+
+        imageView.backgroundColor = UIColor.ypBlack
+        
+        // меняем цвет рамки на черный, т/к/ новый вопрос
+        imageView.layer.borderColor = UIColor.ypBlack.cgColor
+        
+        // здесь мы заполняем нашу картинку, текст и счётчик данными
+        imageView.image = step.image
+        textLabel.text = step.question
+        counterLabel.text = step.questionNumber
     }
     
     private func showNextQuestionOrResults() {
@@ -231,6 +210,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         imageView.layer.borderColor = UIColor.ypBlack.cgColor
         
         imageView.backgroundColor = UIColor.ypWhite
+        
+        presenter.viewController = self
         
         // показываем индикатор загрузки
         activityIndicator.hidesWhenStopped = true
