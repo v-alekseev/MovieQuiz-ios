@@ -3,7 +3,8 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Types
-    private let questionsAmount: Int = 10
+    //private let questionsAmount: Int = 10
+    private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var staticService: StatisticService = StatisticServiceImplementation()
@@ -26,7 +27,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var noButton: UIButton!
     
     // MARK: - Private Properties
-    private var currentQuestionIndex: Int = 0
+    //private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
 
     // MARK: - Initializers
@@ -81,14 +82,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-      // Попробуйте написать код конвертации сами
-        
-        return QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(),
-                question: model.text,  // тупо тект
-                questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)") // высчитываем номер вопроса
-      }
+
     
     private func showAnswerResult(isCorrect: Bool) {
         
@@ -114,11 +108,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         
-        if currentQuestionIndex == questionsAmount - 1 { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
+        if presenter.isLastQuestion() { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
             // Достигли последнего вопроса. показать результат квиза
             
             // сохраняем результат в  UserData
-            staticService.store(correct: correctAnswers, total: questionsAmount)
+            staticService.store(correct: correctAnswers, total: presenter.questionsAmount)
             
             
             //В первой строке выводится результат текущей игры.
@@ -126,7 +120,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             //Третья строчка показывает информацию о лучшей попытке.
             //Четвёртая строка отображает среднюю точность правильных ответов за все игры в процентах.
             let message = """
-Ваш результат: \(correctAnswers)/\(questionsAmount)
+Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
 Количество сыграных квизов: \(staticService.gamesCount)
 Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))
 Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%
@@ -138,7 +132,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                                    message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in
                 guard let self = self else {return}
-                self.currentQuestionIndex = 0  // сразу вернем индекс в начало
+                self.presenter.resetQuestionIndex() //currentQuestionIndex = 0  // сразу вернем индекс в начало
                 self.correctAnswers = 0 // обнулим количество правильных ответов
 
                 self.questionFactory?.requestNextQuestion()
@@ -149,7 +143,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
           
             
         } else {
-            currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
+            presenter.switchToNextQuestion() //currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
             questionFactory?.requestNextQuestion()
         }
     }
@@ -206,7 +200,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         hideLoadingIndicator()
         
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
