@@ -17,23 +17,25 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     let questionsAmount: Int = 10
 
     // MARK: - Public Properties
-    var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewControllerProtocol?
-    var correctAnswers: Int = 0
-    var questionFactory: QuestionFactoryProtocol?
+
 
     // MARK: - Private Properties
     private var currentQuestionIndex: Int = 0
     private var staticService: StatisticService = StatisticServiceImplementation()
+    
+    private var currentQuestion: QuizQuestion?
+    private weak var viewController: MovieQuizViewControllerProtocol?
+    private var correctAnswers: Int = 0
+    private var questionFactory: QuestionFactoryProtocol?
 
     // MARK: - Initializers
     
-    init(viewController: MovieQuizViewControllerProtocol) {
-        self.viewController = viewController
+    init(view: MovieQuizViewControllerProtocol) {
+        self.viewController = view
         
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
-        viewController.showLoadingIndicator()
+        viewController?.showLoadingIndicator()
     }
 
     // MARK: - QuestionFactoryDelegate methods
@@ -61,7 +63,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             self.questionFactory?.requestNextQuestion()
         }
         
-        viewController?.getAlertPresenter().alert(model: alertModel)
+        viewController?.alertPresenter.alert(model: alertModel)
     }
     
 
@@ -113,7 +115,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 
         }
         
-        viewController?.getAlertPresenter().alert(model: alertModel)
+        viewController?.alertPresenter.alert(model: alertModel)
     }
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -170,7 +172,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
                 self.restartGame() // self.questionFactory?.requestNextQuestion()  делаем внутри
             }
             
-            self.viewController?.getAlertPresenter().alert(model: alertModel)
+            self.viewController?.alertPresenter.alert(model: alertModel)
           
             
         } else {

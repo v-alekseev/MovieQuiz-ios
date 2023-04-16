@@ -10,7 +10,8 @@ protocol MovieQuizViewControllerProtocol: AnyObject {
     func showLoadingIndicator()
     func hideLoadingIndicator()
     
-    func getAlertPresenter() -> AlertPresenter 
+    //func getAlertPresenter() -> AlertPresenter
+    var alertPresenter: AlertPresenter { get }
 }
 
 final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
@@ -19,7 +20,9 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
 
     // MARK: - Public Properties
 
-    private let alertViewController = AlertPresenter()
+
+    
+    var alertPresenter:  AlertPresenter { return alertPresenterPrivate}
    
     // MARK: - IBOutlet
     @IBOutlet private weak var imageView: UIImageView!
@@ -32,14 +35,12 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     // MARK: - Private Properties
 
     private var presenter: MovieQuizPresenter!
+    private let alertPresenterPrivate = AlertPresenter()
 
     // MARK: - Initializers
 
     // MARK: - Public methods
-    
-    func getAlertPresenter() -> AlertPresenter {
-        return alertViewController
-    }
+
     
     func showLoadingIndicator() {
         activityIndicator.startAnimating() // включаем анимацию
@@ -94,7 +95,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        alertViewController.parentViewController  = self
+        alertPresenter.parentViewController  = self
         
         // показываем индикатор загрузки
         activityIndicator.hidesWhenStopped = true
@@ -108,7 +109,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         imageView.backgroundColor = UIColor.ypWhite
         
         // Создаем presentor
-        presenter = MovieQuizPresenter(viewController: self)
+        presenter = MovieQuizPresenter(view: self)
     }
     
     // это нужно для белого шрифта в статус бар

@@ -22,23 +22,6 @@ final class QuestionFactory: QuestionFactoryProtocol {
            self.delegate = delegate
        }
     
-// пока это оставлено специально для ретроспективы
-//    func requestNextQuestion() {
-//        // это нужно что бы не повторялся два раза подряд один и тот же запрос
-//        repeat{
-//            guard let index = (0..<questions.count).randomElement() else {
-//                delegate?.didReceiveNextQuestion(question: nil)
-//                return
-//            }
-//            currentIndex = index
-//        }while(currentIndex == previosIndex)  // Если новый индекс равен старому, запрашиваем новый
-//
-//        previosIndex = currentIndex
-//        let question = questions[safe: currentIndex]
-//        delegate?.didReceiveNextQuestion(question: question)
-//        return
-//    }
-    
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
@@ -48,7 +31,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
             
             var imageData = Data()
            
-             // долгая загрузка
+            // долгая загрузка
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
@@ -82,7 +65,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
     }
     
     func loadData() {
-        // todo   зачем тут DispatchQueue.main.async  - сетевые запросы всегда работают в другом потоке, когда мы обрабатываем ответ от загрузчика фильмов в QuestionFactory, надо тоже перейти в главный поток (используем конструкцию DispatchQueue.main.async).
+        //DispatchQueue.main.async  - сетевые запросы всегда работают в другом потоке, когда мы обрабатываем ответ от загрузчика фильмов в QuestionFactory, надо тоже перейти в главный поток (используем конструкцию DispatchQueue.main.async).
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }

@@ -10,6 +10,7 @@ import UIKit
 class AlertPresenter {
     weak var parentViewController: UIViewController? = nil
     
+
     func alert(model: AlertModel){
         
         // создаём объекты всплывающего окна
