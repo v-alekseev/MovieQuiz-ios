@@ -1,13 +1,25 @@
 import UIKit
 
+protocol MovieQuizViewControllerProtocol: AnyObject {
+    func show(quiz step: QuizStepViewModel)
+    
+    func highlightImageBorder(isCorrect: Bool)
+    
+    func enableButtons(_ isEnabled: Bool) 
+    
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
+    
+    func getAlertPresenter() -> AlertPresenter 
+}
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
 
     // MARK: - Constants
 
     // MARK: - Public Properties
 
-    let alertViewController = AlertPresenter()
+    private let alertViewController = AlertPresenter()
    
     // MARK: - IBOutlet
     @IBOutlet private weak var imageView: UIImageView!
@@ -23,9 +35,11 @@ final class MovieQuizViewController: UIViewController {
 
     // MARK: - Initializers
 
-    // MARK: - UIViewController(*)
-
     // MARK: - Public methods
+    
+    func getAlertPresenter() -> AlertPresenter {
+        return alertViewController
+    }
     
     func showLoadingIndicator() {
         activityIndicator.startAnimating() // включаем анимацию
