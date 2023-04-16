@@ -7,7 +7,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
    // private var currentQuestion: QuizQuestion? // todo delete
-    private var staticService: StatisticService = StatisticServiceImplementation()
+   //  private var staticService: StatisticService = StatisticServiceImplementation()
     private let moviesLoader: MoviesLoading  = MoviesLoader()
 
     let alertViewController = AlertPresenter()
@@ -28,7 +28,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Private Properties
     //private var currentQuestionIndex: Int = 0
-    private var correctAnswers: Int = 0
+    //private var correctAnswers: Int = 0
 
     // MARK: - Initializers
 
@@ -45,7 +45,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         // устанавливаем цвет рамки в зависимости от того, правильный или нет ответ
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor  // цвет рамки
         
-        if isCorrect { correctAnswers += 1} // если ответ правильный, увеличим счетчик
+        // todo это надо перенести в презентер
+        if isCorrect { presenter.correctAnswers += 1} // если ответ правильный, увеличим счетчик
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {  [weak self] in // запускаем задачу через 1 секунду
             guard let self = self else {return}
@@ -53,7 +54,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             // включаем кноаки
             self.yesButton.isEnabled = true
             self.noButton.isEnabled = true
-            self.showNextQuestionOrResults()
+
+            self.presenter.showNextQuestionOrResults()
         }
 
     }
@@ -85,48 +87,49 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         counterLabel.text = step.questionNumber
     }
     
-    private func showNextQuestionOrResults() {
+//    private func showNextQuestionOrResults() {
+
         
-        if presenter.isLastQuestion() {
-            // Достигли последнего вопроса. показать результат квиза
-            
-            // сохраняем результат в  UserData
-            staticService.store(correct: correctAnswers, total: presenter.questionsAmount)
-            
-            
-            //В первой строке выводится результат текущей игры.
-            //Во второй строчке выводится количество завершённых игр.
-            //Третья строчка показывает информацию о лучшей попытке.
-            //Четвёртая строка отображает среднюю точность правильных ответов за все игры в процентах.
-            let message = """
-Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
-Количество сыграных квизов: \(staticService.gamesCount)
-Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))
-Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%
-"""
-    
-    
-
-            let alertModel = AlertModel(title: "Этот раунд окончен!",
-                                   message: message,
-                                   buttonText: "Сыграть ещё раз") { [weak self] in
-                guard let self = self else {return}
-                self.presenter.resetQuestionIndex() //currentQuestionIndex = 0  // сразу вернем индекс в начало
-                self.correctAnswers = 0 // обнулим количество правильных ответов
-
-                self.questionFactory?.requestNextQuestion()
-            }
-            
-            
-            alertViewController.alert(model: alertModel)
-          
-            
-        } else {
-            // Показываем следующий вопрос
-            presenter.switchToNextQuestion() //currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
-            questionFactory?.requestNextQuestion()
-        }
-    }
+//        if presenter.isLastQuestion() {
+//            // Достигли последнего вопроса. показать результат квиза
+//
+//            // сохраняем результат в  UserData
+//            staticService.store(correct: correctAnswers, total: presenter.questionsAmount)
+//
+//
+//            //В первой строке выводится результат текущей игры.
+//            //Во второй строчке выводится количество завершённых игр.
+//            //Третья строчка показывает информацию о лучшей попытке.
+//            //Четвёртая строка отображает среднюю точность правильных ответов за все игры в процентах.
+//            let message = """
+//Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)
+//Количество сыграных квизов: \(staticService.gamesCount)
+//Рекорд: \(staticService.bestGame.correct)/\(staticService.bestGame.total) (\(staticService.bestGame.date.dateTimeString))
+//Средняя точность: \(round(staticService.totalAccuracy*100*100)/100)%
+//"""
+//
+//
+//
+//            let alertModel = AlertModel(title: "Этот раунд окончен!",
+//                                   message: message,
+//                                   buttonText: "Сыграть ещё раз") { [weak self] in
+//                guard let self = self else {return}
+//                self.presenter.resetQuestionIndex() //currentQuestionIndex = 0  // сразу вернем индекс в начало
+//                self.correctAnswers = 0 // обнулим количество правильных ответов
+//
+//                self.questionFactory?.requestNextQuestion()
+//            }
+//
+//
+//            alertViewController.alert(model: alertModel)
+//
+//
+//        } else {
+//            // Показываем следующий вопрос
+//            presenter.switchToNextQuestion() //currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
+//            questionFactory?.requestNextQuestion()
+//        }
+//    }
     
     private func printError(_ log: String){
         print(log + " File: \(#file) function: \(#function), line: \(#line)")
@@ -225,6 +228,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         showLoadingIndicator()
         
         questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: self)
+        presenter.questionFactory = self.questionFactory
         
         // загружаем данные
         questionFactory?.loadData()
