@@ -6,7 +6,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     //private let questionsAmount: Int = 10
     private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion? // todo delete
+   // private var currentQuestion: QuizQuestion? // todo delete
     private var staticService: StatisticService = StatisticServiceImplementation()
     private let moviesLoader: MoviesLoading  = MoviesLoader()
 
@@ -61,18 +61,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - IBAction
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        presenter.currentQuestion = currentQuestion
+        //presenter.currentQuestion = currentQuestion
         presenter.yesButtonClicked()
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.currentQuestion = currentQuestion
+        //presenter.currentQuestion = currentQuestion
         presenter.yesButtonClicked()
     }
     
     
     // MARK: - Private Methods
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
 
         imageView.backgroundColor = UIColor.ypBlack
         
@@ -87,7 +87,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private func showNextQuestionOrResults() {
         
-        if presenter.isLastQuestion() { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
+        if presenter.isLastQuestion() {
             // Достигли последнего вопроса. показать результат квиза
             
             // сохраняем результат в  UserData
@@ -122,6 +122,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
           
             
         } else {
+            // Показываем следующий вопрос
             presenter.switchToNextQuestion() //currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
             questionFactory?.requestNextQuestion()
         }
@@ -171,18 +172,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
         
         //скрываем индикатор загрузки
         hideLoadingIndicator()
-        
-        currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-        }
+
+        presenter.didReceiveNextQuestion(question: question)
+//        guard let question = question else {
+//            return
+//        }
+//
+//        //скрываем индикатор загрузки
+//        hideLoadingIndicator()
+//
+//        currentQuestion = question
+//        let viewModel = presenter.convert(model: question)
+//        DispatchQueue.main.async { [weak self] in
+//            self?.show(quiz: viewModel)
+//        }
     }
     
     func didLoadDataFromServer() {

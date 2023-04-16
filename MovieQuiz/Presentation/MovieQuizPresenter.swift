@@ -48,28 +48,35 @@ final class MovieQuizPresenter {
     }
     
     func yesButtonClicked() {
-        guard let currentQuestion = currentQuestion else { // ОШИБКА КОМПИЛЯЦИИ 1: `currentQuestion` не определён
-            return
-        }
-        
-        let givenAnswer = true
-        
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer) // ОШИБКА КОМПИЛЯЦИИ 2: метод `showAnswerResult` не определён
+        didAnswer(givenAnswer: true)
     }
     
     func noButtonClicked() {
+        didAnswer(givenAnswer: false)
+    }
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+
+        currentQuestion = question
+        let viewModel = self.convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
+    
+
+    // MARK: - Private Methods
+
+    private func didAnswer(givenAnswer: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
         }
         
-        let givenAnswer = false
-        
         viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
-
-    // MARK: - Private Methods
-
-
     
 
     
