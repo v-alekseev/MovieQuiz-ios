@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     
     // MARK: - Types
@@ -27,8 +27,95 @@ final class MovieQuizPresenter {
     private var staticService: StatisticService = StatisticServiceImplementation()
 
     // MARK: - Initializers
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
 
+    // MARK: - QuestionFactoryDelegate methods
+    
+    func didLoadDataFromServer() {
+        //скрываем индикатор загрузки в didReceiveNextQuestion т/к/ последует долгая загрузка картинок.
+        questionFactory?.requestNextQuestion()
+    }
+    
+    
+    func didFailToLoadData(with error: Error) {
+        //скрываем индикатор загрузки т.к. дальше только показ ошибки
+        viewController?.hideLoadingIndicator()
+
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+    }
+    
+    func didFailReceiveNextQuestion() {
+
+        let alertModel = AlertModel(title: "Ошибка загрузки вопроса!",
+                               message: "К сожалению, не получилось загрузить вопрос.",
+                               buttonText: "Загрузить следующий вопрос") { [weak self] in
+            guard let self = self else {return}
+            
+            self.questionFactory?.requestNextQuestion()
+        }
+        // todo Подумать что бы пееренести alertViewController в презентер
+        viewController?.alertViewController.alert(model: alertModel)
+    }
+    
+
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        //скрываем индикатор загрузки
+        viewController?.hideLoadingIndicator()
+
+        currentQuestion = question
+        let viewModel = self.convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
     // MARK: - Public methods
+    
+    func showAnswerResult(isCorrect: Bool) {
+        
+        // блокируем кнопки
+        viewController?.enableButtons(false)
+        
+        viewController?.highlightImageBorder(isCorrect: isCorrect)
+     
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {  [weak self] in // запускаем задачу через 1 секунду
+            // код, который вы хотите вызвать через 1 секунду,
+            guard let self = self else {return}
+            // включаем кноаки
+            self.viewController?.enableButtons(true)
+
+            self.showNextQuestionOrResults()
+        }
+
+    }
+    
+    func showNetworkError(message: String) {
+        //создаем и показываем алерт
+        let alertModel = AlertModel(title: "Ошибка!",
+                               message: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else {return}
+
+            // проверить как это работает
+            // показываем индикатор загрузки
+            self.viewController?.showLoadingIndicator()
+            // пытаемся опять загрузить данные
+            self.questionFactory?.loadData()
+
+        }
+        
+        viewController?.alertViewController.alert(model: alertModel)
+    }
     
     func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
@@ -39,10 +126,6 @@ final class MovieQuizPresenter {
     
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
-    }
-    
-    func resetQuestionIndex() {
-        currentQuestionIndex = 0
     }
     
     func switchToNextQuestion() {
@@ -57,17 +140,6 @@ final class MovieQuizPresenter {
         didAnswer(givenAnswer: false)
     }
     
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
-
-        currentQuestion = question
-        let viewModel = self.convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.viewController?.show(quiz: viewModel)
-        }
-    }
     
     func showNextQuestionOrResults() {
         
@@ -95,12 +167,9 @@ final class MovieQuizPresenter {
                                    message: message,
                                    buttonText: "Сыграть ещё раз") { [weak self] in
                 guard let self = self else {return}
-                self.resetQuestionIndex() //currentQuestionIndex = 0  // сразу вернем индекс в начало
-                self.correctAnswers = 0 // обнулим количество правильных ответов
-
-                self.questionFactory?.requestNextQuestion()
+                
+                self.restartGame() // self.questionFactory?.requestNextQuestion()  делаем внутри
             }
-            
             
             self.viewController?.alertViewController.alert(model: alertModel)
           
@@ -118,11 +187,18 @@ final class MovieQuizPresenter {
         guard let currentQuestion = currentQuestion else {
             return
         }
+        let isCorrect = (givenAnswer == currentQuestion.correctAnswer)
         
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        if isCorrect { self.correctAnswers += 1} // если ответ правильный, увеличим счетчик
+        
+        showAnswerResult(isCorrect: isCorrect) // показываем рамку соответствующего цвета и слудующий вопрос
     }
     
-
+    private func restartGame() {
+        currentQuestionIndex = 0 // вернем инекс вопроса в начало
+        correctAnswers = 0 // обнулим количество правильных ответов
+        questionFactory?.requestNextQuestion() // запросим следующий вопрос
+    }
     
 
 }
