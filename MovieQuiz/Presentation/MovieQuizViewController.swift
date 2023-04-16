@@ -89,13 +89,6 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         counterLabel.text = step.questionNumber
     }
     
-
-    
-    private func printError(_ log: String){
-        print(log + " File: \(#file) function: \(#function), line: \(#line)")
-    }
-    
-    
     
     // MARK: - Lifecycle
     override func viewDidLoad() {

@@ -18,7 +18,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 
     // MARK: - Public Properties
     var currentQuestion: QuizQuestion?
-   // weak var viewController: MovieQuizViewController?
     weak var viewController: MovieQuizViewControllerProtocol?
     var correctAnswers: Int = 0
     var questionFactory: QuestionFactoryProtocol?
@@ -36,10 +35,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         questionFactory?.loadData()
         viewController.showLoadingIndicator()
     }
-    
-//    init(viewController: MovieQuizViewControllerProtocol) {
-//        // пустой конструктор для поддерки тестов
-//    }
 
     // MARK: - QuestionFactoryDelegate methods
     
@@ -65,7 +60,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             
             self.questionFactory?.requestNextQuestion()
         }
-        // todo Подумать что бы пееренести alertViewController в презентер
+        
         viewController?.getAlertPresenter().alert(model: alertModel)
     }
     
@@ -111,7 +106,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
                                buttonText: "Попробовать еще раз") { [weak self] in
             guard let self = self else {return}
 
-            // проверить как это работает
             // показываем индикатор загрузки
             self.viewController?.showLoadingIndicator()
             // пытаемся опять загрузить данные
