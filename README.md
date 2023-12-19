@@ -16,7 +16,6 @@ MovieQuiz - это приложение с квизами о фильмах из
 ## **Стек**
 - Архитектура MVP и  MVC.
 - Вёрстка в Storyboard. Дизайн в Figma.
-- UICollectionView, UITabBarController, UINavigationController.
 - Сетевой запрос с помощью URLSession.
 - Добавлены  Unit Tests
 
